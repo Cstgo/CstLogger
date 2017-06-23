@@ -1,0 +1,58 @@
+// The following link contains the original work. https://github.com/sparkfun/Sound_Detector
+
+ //GND → GND
+ //VCC → 5V
+ //Gate → Pin 2
+ //Envelope → A1
+ 
+#define PIN_GATE_IN 2
+#define IRQ_GATE_IN  0
+#define PIN_LED_OUT 13
+#define PIN_ANALOG_IN A1
+
+// soundISR()
+// This function is installed as an interrupt service routine for the pin
+// change interrupt.  When digital input 2 changes state, this routine
+// is called.
+// It queries the state of that pin, and sets the onboard LED to reflect that 
+// pin's state.
+void soundISR()
+{
+  int pin_val;
+
+  pin_val = digitalRead(PIN_GATE_IN);
+  digitalWrite(PIN_LED_OUT, pin_val);   
+}
+
+void setup()
+{
+  Serial.begin(9600);
+
+  //  Configure LED pin as output
+  pinMode(PIN_LED_OUT, OUTPUT);
+
+  // configure input to interrupt
+  pinMode(PIN_GATE_IN, INPUT);
+  attachInterrupt(IRQ_GATE_IN, soundISR, CHANGE);
+
+  // Display status
+  Serial.println("Initialized");
+}
+
+void loop()
+{
+  int value;
+
+  // Check the envelope input
+  value = analogRead(PIN_ANALOG_IN);
+
+    // Convert envelope value into a message
+  //Was considered as minimum at 21 dB. Then we proceeded to write down the Voltage and the
+  //following equation was solved. "8" is the registred value in 21 dB.
+  //21=20*log(8/x) x~2.79
+    Serial.print(20*log(value/2.8)); 
+    Serial.print(" dB");
+    Serial.print('\n');
+    // pause for 1 second
+    delay(100);
+}
