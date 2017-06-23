@@ -1,0 +1,29 @@
+// The links used to create this code are the following:
+*** http://www.naylampmechatronics.com/blog/42_Tutorial-sensores-de-gas-MQ2-MQ3-MQ7-y-MQ13.html
+*** https://www.sparkfun.com/datasheets/Sensors/Biometric/MQ-7.pdf
+
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  ///1284 is the Ro value, and it could be obtained by measuring voltage with a sample containing 2000 ppm of CO.
+  ///With the Voltage we get the Rs, and with this, we can get the Ro from Rs / Ro, which at 2000ppm is 0.12, with 
+  ///a low difference respecting the expected value of Ro.
+  int adc_MQ = analogRead(A0); 
+  float voltaje = adc_MQ * (5.0 / 1023.0); 
+  float Rs=1000*((5-voltaje)/voltaje);  
+  double monoxide =76.211*pow(Rs/1284, -1.663);
+
+  Serial.print("adc:");
+  Serial.print(adc_MQ);
+  Serial.print("   voltaje:");
+  Serial.print(voltaje);
+  Serial.print("   Rs:");
+  Serial.print(Rs);
+  Serial.print("   monoxide:");
+  Serial.print(monoxide);
+  Serial.println("ppmv");
+  delay(500);
+}
