@@ -4,13 +4,12 @@ dht11 DHT;
 #define DHT11_PIN 4
 //DHT11*********************************************************************
 //SONIDO********************************************************************
-
-//DUST SENSOR***************************************************************
 #define PIN_GATE_IN 2
 #define IRQ_GATE_IN  0
 #define PIN_LED_OUT 13
 #define PIN_ANALOG_IN A1
-//SONIDO*************************************************************
+//SONIDO*******************************************************************
+//DUST SENSOR***************************************************************
 int pin = 7;
 unsigned long duration;
 unsigned long starttime;
@@ -18,10 +17,9 @@ unsigned long sampletime_ms = 2000;//sampe 30s&nbsp;;
 unsigned long lowpulseoccupancy = 0;
 float ratio = 0;
 float concentration = 0;
-
 //DUST SENSOR**************************************************************
 //MQ7************************************************************
-int sensorValue;
+int adc_MQ = analogRead(A2);
 //MQ7*************************************************************
 
 //SONIDO***********************************************************
@@ -35,21 +33,17 @@ void soundISR()
 //SONIDO*******************************************************************
 
 void setup(){
-  //DHT11******************************************************************
+//DHT11******************************************************************
   Serial.begin(9600);
-  Serial.println("DHT TEST PROGRAM ");
-  Serial.print("LIBRARY VERSION: ");
   Serial.println(DHT11LIB_VERSION);
-  Serial.println();
-  Serial.println("Type,\tstatus,\tHumidity (%),\tTemperature (C)");
-  //DHT11******************************************************************
+//DHT11******************************************************************
 
-  //DUST SENSOR**************************************************************
+//DUST SENSOR**************************************************************
     pinMode(7,INPUT);
   starttime = millis();//get the current time;
-   //DUST SENSOR**************************************************************
+//DUST SENSOR**************************************************************
 
-   //SONIDO*****************************************************************
+//SONIDO*****************************************************************
      //  Configure LED pin as output
   pinMode(PIN_LED_OUT, OUTPUT);
 
@@ -59,11 +53,11 @@ void setup(){
 
   // Display status
   Serial.println("Initialized");
-  //SONIDO************************************************************************
+//SONIDO************************************************************************
 }
 
 void loop(){
- //DHT11*******************************************************************
+//DHT11*******************************************************************
  int chk;
   Serial.print("DHT11, \t");
   chk = DHT.read(DHT11_PIN);    // READ DATA
@@ -87,9 +81,9 @@ void loop(){
   Serial.println(DHT.temperature,1);
 
   delay(1000);
-  //DHT11*********************************************************************
+//DHT11*********************************************************************
 
-  //DUST SENSOR***************************************************************
+//DUST SENSOR***************************************************************
   duration = pulseIn(pin, LOW);
   lowpulseoccupancy = lowpulseoccupancy+duration;
 
@@ -100,18 +94,20 @@ void loop(){
     Serial.print("concentration = ");
     Serial.print(concentration);
     Serial.println(" particulas/L");
-    Serial.println("\n");
     lowpulseoccupancy = 0;
     starttime = millis();
-    //DUST SENSOR**************************************************************
+//DUST SENSOR**************************************************************
 
-    //MQ7********************************************************************
-      sensorValue = analogRead(0);       // read analog input pin 0
-  Serial.println(sensorValue, DEC);  // prints the value read
-  delay(100);                        // wait 100ms for next reading
-  //MQ7****************************************************************
+//MQ7********************************************************************
+  float voltaje = adc_MQ * (5.0 / 1023.0); 
+  float Rs=1000*((5-voltaje)/voltaje);  
+  double monoxide =76.211*pow(Rs/1284, -1.663);      // read analog input pin 0
+  Serial.println(monoxide);  // prints the value read
+  Serial.println(" ppmv"); 
+  delay(1000);                        // wait 100ms for next reading
+//MQ7****************************************************************
 
-  //SONIDO***************************************************************
+//SONIDO***************************************************************
   int value;
 
   // Check the envelope input
@@ -126,5 +122,5 @@ void loop(){
     Serial.print('\n');
     // pause for 1 second
     delay(100);
-    //SONIDO************************************************************
+//SONIDO************************************************************
 }
